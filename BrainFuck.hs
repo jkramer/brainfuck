@@ -63,7 +63,7 @@ safeGetChar = hIsEOF stdin >>= \ eof -> if eof then return '\0' else getChar
 
 
 -- Print the character in the current register.
-output = putChar . chr . currentValue
+output = (>> hFlush stdout) . putChar . chr . currentValue
 
 
 -- Take a callback, apply it on the value of the current register.
