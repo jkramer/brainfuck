@@ -22,13 +22,17 @@ execute runTime (command:rest) = do
 	case command of
 		'+' -> execute (increase runTime) rest
 		'-' -> execute (decrease runTime) rest
-		'>' -> execute (up runTime) rest
-		'<' -> execute (down runTime) rest
+		'>' -> execute (up       runTime) rest
+		'<' -> execute (down     runTime) rest
+
+		',' -> input runTime >>= flip execute rest
 		'.' -> output runTime >> execute runTime rest
-		',' -> input runTime >>= \ runTime' -> execute runTime' rest
-		'[' -> runLoop loop runTime >>= \ runTime' -> execute runTime' loopRest
 		'#' -> print runTime >> execute runTime rest
+
+		'[' -> runLoop loop runTime >>= flip execute loopRest
+
 		_   -> execute runTime rest
+
 	where
 		loop = init (loopCode rest 1)
 		loopRest = drop ((length loop) + 1) rest
@@ -51,7 +55,7 @@ down (RunTime offset memory) = RunTime (offset - 1) memory
 
 
 -- Read a character into the register at the current position.
-input runTime = safeGetChar >>= \ ch -> return $ changeMemory (\_ -> ord ch) runTime
+input runTime = safeGetChar >>= return . flip changeMemory runTime . const . ord
 
 
 -- Read a character and return it (or \0 if EOF is reached).
